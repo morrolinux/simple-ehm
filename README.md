@@ -1,13 +1,14 @@
 # simple-ehm
 A simple tool for a simple task: remove filler sounds ("ehm") from pre-recorded speeches. AI powered.
+Istruzioni in italiano in fondo al documento.
 
 # Usage
 Basic invokation should be enough:
-./simple_emh-runnable.py /path/to/video/file
-This will generate a subtilte track (.srt) for debugging and the output video in the same folder as the original file.
+`./simple_emh-runnable.py /path/to/video/file`
+This will generate a subtilte track (`.srt`) for debugging and the output video in the same folder as the original file.
 
 For more info read the help:
-./simple_emh-runnable.py --help
+`./simple_emh-runnable.py --help`
 
 # Contributing to the model
 There are two ways you can contribute to the model:
@@ -20,6 +21,7 @@ You can convert your clips to the right format with ffmpeg: `ffmpeg -i input-fil
 - By implementing transfer training logic on this model's python notebook
 - By retraining the current model with your dataset and make a PR with the updated one
 
+
 # ITA
 
 # simple-ehm
@@ -27,11 +29,11 @@ Un semplice strumento per un semplice compito: rimuovere gli "ehm" (suoni di rie
 
 # Utilizzo
 L'invocazione base dovrebbe essere sufficiente:
-./simple_emh-runnable.py /percorso/al/file/video
-Questo genererò una traccia di sottotitoli (.srt) per fini diagnostici e il video tagliato nella stessa cartella del file originale.
+`./simple_emh-runnable.py /percorso/al/file/video`
+Questo genererò una traccia di sottotitoli (`.srt`) per fini diagnostici e il video tagliato nella stessa cartella del file originale.
 
 Per maggiori informazioni sui parametri accettati, leggi la guida:
-./simple_emh-runnable.py --help
+`./simple_emh-runnable.py --help`
 
 # Contribuire al modello
 Ci sono due modi in cui puoi contribuire al modello:
