@@ -3,6 +3,7 @@
 # ffmpeg -i full.wav -f segment -segment_time 1 -c copy out%03d.wav
 # and then manually dividing the speech from emh(s) into separate folders
 import os
+import io
 import pathlib
 import argparse
 
@@ -36,12 +37,15 @@ parser.add_argument("--window-slide-divide", type=float, default=2, help="divide
 parser.add_argument("--fps", type=int, default=-1, help="frames per second of the encoded video. Lower FPS mean faster encoding (default: original)")
 parser.add_argument("--crf", type=int, default=-1, help="CRF factor for h264 encoding.")
 parser.add_argument("--spectrogram", default=False, action='store_true', help="print spectrogram of window_size sliding by window_slide during analysis (debubbing only)")
+parser.add_argument("--generate-training-data", default=False, action='store_true', help="export extracted ehm(s) and silences as well to a separate folder. Useful for training on false positives")
+parser.add_argument("--srt", default=False, action='store_true', help="generate subtitle track for easier accuracy evaluation")
 
 args = parser.parse_args()
 video_path = args.filename
 audio_len = None
 pbar = None
 tmp_folder = "tmp"
+td_folder = "training_data"
 _perf = dict()
 stats = None
 labels = ["emh", "silence", "speech"]
@@ -103,6 +107,18 @@ def get_spectrogram(waveform, seek, window_size):
 
     return spectrogram
 
+def td_folder_init():
+    with suppress(FileExistsError): os.mkdir(td_folder)
+    removelist = [ f for f in os.listdir(td_folder) if f.endswith(".wav") ]
+    for f in removelist:
+        os.remove(os.path.join(td_folder, f))
+
+def generate_tdata(ss, to, count, label):
+    filename = td_folder + "/" + label + "-" + str(count) + ".wav"
+    cuts.append(["ffmpeg", "-y", "-ss", ss, "-i", video_path, "-t", "1"])
+    cuts[-1].extend(["-c:a", "pcm_s16le", "-ac", "1", "-ar", "16000", "-filter:a", "dynaudnorm"])
+    cuts[-1].extend([filename])
+
 def generate_cut(ss, to, count):
     out_name = str(count) + video_path[-4:]
     cuts.append(["ffmpeg", "-ss", ss ,"-i", video_path,  "-to", to, "-copyts"])
@@ -114,12 +130,8 @@ def generate_cut(ss, to, count):
     if args.fastcut:
         cuts[-1].extend(["-c:a", "copy", "-c:v", "copy", "-avoid_negative_ts", "1"])
     else:
-
         cuts[-1].extend(["-c:v", "libx264", "-crf", "23"])
     cuts[-1].extend([tmp_folder + "/" + out_name, "-y"])
-    # for e in cuts[-1]:
-    #     print(e + " ", end="")
-    # print("")
     mergelist.append("file '" + out_name + "'")
  
 @timeit
@@ -132,9 +144,13 @@ def analyze_track(model, waveform, sample_rate):
     lastts = "00:00:00.000" # last cut was at this timestamp
     count = 0               # number of subtitle records
     lastwf = 0      # last frame of last analyzed. for 0s --> 1s at 16000Hz would be 16000
-
     stats = [[0,0] for _ in range(len(labels))]
-    sub = open(video_path[:-4] + ".srt", 'w', encoding = 'utf-8')  # subtitle track name
+
+    if args.srt:
+        sub = open(video_path[:-4] + ".srt", 'w', encoding = 'utf-8')  # subtitle track name
+    else:
+        sub = io.StringIO()  # RAM file if no subtitle file needs to be generated
+
     window_size = int(sample_rate/args.window_size_divide)  # 1s by default
     window_slide = int(window_size/args.window_slide_divide)
 
@@ -179,6 +195,8 @@ def analyze_track(model, waveform, sample_rate):
             # generate cut
             if labels[lastc] == "speech":
                 generate_cut(lastts, ts, count)
+            elif args.generate_training_data:
+                generate_tdata(lastts, ts, count, labels[lastc])
             lastts = ts
             lastc = cls
         # slide the right hand side of the window detection.
@@ -220,6 +238,7 @@ def cut_and_merge(out_filename):
                 # if the occupying job has terminated with an error, abort everything.
                 if procs[p] is not None and procs[p].poll() != 0:
                     print("there was an error with an ffmpeg process. aborting!!!")
+                    print(procs[p].stderr.read())
                     exit(1)
                 procs[p] = subprocess.Popen(cuts[i], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 # print(procs[p], "issued. PID:", procs[p].pid)
@@ -241,9 +260,7 @@ def cut_and_merge(out_filename):
     minute = str(datetime.datetime.now().minute)
     secs = str(datetime.datetime.now().second)
     
-    out_filename += "-" + hour + "-" + minute + "-" + secs + \
-                   "-wsi_" + str(args.window_size_divide) + \
-                   "-wsl_" + str(args.window_slide_divide) + video_path[-4:]
+    out_filename += "_" + hour + "-" + minute + "-" + secs + video_path[-4:]
     
     cmd = ["ffmpeg", "-f", "concat", "-i", mergelist_path, "-c", "copy", out_filename, "-y"]
     subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE).wait()
@@ -251,7 +268,10 @@ def cut_and_merge(out_filename):
 
 if __name__ == '__main__':
     with suppress(FileExistsError): os.mkdir(tmp_folder)
-    
+
+    if args.generate_training_data:
+        td_folder_init() 
+
     model = tf.keras.models.load_model('model')
     wav_path = convert_input(video_path)
     audio_binary = tf.io.read_file(wav_path)
