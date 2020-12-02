@@ -15,7 +15,8 @@ There are two ways you can contribute to the model:
 
 ## Contribute to the dataset
 By sending me at least 30 1-second long WAV pcm_s16le mono 16kHz clips for each class (silence, speech, ehm)  [easy]
-You can convert your clips to the right format with ffmpeg: `ffmpeg -i input-file -c:a pcm_s16le -ac 1 -ar 16000 -filter:a "dynaudnorm" output.wav`
+- You can convert your clips to the right format with ffmpeg: `ffmpeg -i input-file -c:a pcm_s16le -ac 1 -ar 16000 -filter:a "dynaudnorm" output.wav`
+- You can extract ehm(s) and silences **along with erroneously classified sounds** (false positives) by passing `--generate-training-data` as an invocation parameter. You can then use the latter to improve your training set!
 
 ## Contribute to the training
 - By implementing transfer training logic on this model's python notebook
@@ -40,7 +41,8 @@ Ci sono due modi in cui puoi contribuire al modello:
 
 ## Contribuisci al dataset
 Inviandomi almeno 30 clip in formato WAV (pcm_s16le) mono con campionamento a 16kHz per ciascuna classe (silenzio, parlato, ehm)  [facile]
-Puoi convertire le tue clip nel formato corretto con ffmpeg: `ffmpeg -i input-file -c:a pcm_s16le -ac 1 -ar 16000 -filter:a "dynaudnorm" output.wav`
+- Puoi convertire le tue clip nel formato corretto con ffmpeg: `ffmpeg -i input-file -c:a pcm_s16le -ac 1 -ar 16000 -filter:a "dynaudnorm" output.wav`
+- Puoi estrarre gli ehm(s) e i silenzi **anche quelli classificati erroneamente** (falsi positivi) passando `--generate-training-data` come parametro di invocazione. Puoi usare le clip classificate erroneamente per migliorare il tuo training set!
 
 ## Contribuisci al training
 - Implementando la logica di transfer training sul notebook python di questo modello, e
