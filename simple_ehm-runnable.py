@@ -80,7 +80,7 @@ def timeit(f):
 def convert_input(path):
     wav_path = path[:-4] + ".wav"
     print("extracting audio track...")
-    cmd = ["ffmpeg", "-i", path, "-c:a", "pcm_s16le", "-ar", "16000", "-ac", "1",\
+    cmd = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-i", path, "-c:a", "pcm_s16le", "-ar", "16000", "-ac", "1",\
           "-filter:a", "dynaudnorm", wav_path, "-y"]
     subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE).wait()
     return wav_path
@@ -118,13 +118,13 @@ def td_folder_init():
 
 def generate_tdata(ss, to, count, label):
     filename = td_folder + "/" + label + "-" + str(count) + ".wav"
-    cuts.append(["ffmpeg", "-y", "-ss", ss, "-i", video_path, "-t", "1"])
+    cuts.append(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-ss", ss, "-i", video_path, "-t", "1"])
     cuts[-1].extend(["-c:a", "pcm_s16le", "-ac", "1", "-ar", "16000", "-filter:a", "dynaudnorm"])
     cuts[-1].extend([filename])
 
 def generate_cut(ss, to, count):
     out_name = str(count) + video_path[-4:]
-    cuts.append(["ffmpeg", "-ss", ss ,"-i", video_path,  "-to", to, "-copyts"])
+    cuts.append(["ffmpeg", "-hide_banner", "-loglevel", "error", "-ss", ss ,"-i", video_path,  "-to", to, "-copyts"])
     if args.crf > 0:
         cuts[-1].extend(["-crf", str(args.crf)])
     if args.fps > 0:
@@ -244,7 +244,7 @@ def cut_and_merge(out_filename):
                 # if the occupying job has terminated with an error, abort everything.
                 if procs[p] is not None and procs[p].poll() != 0:
                     print("there was an error with an ffmpeg process. aborting!!!")
-                    print(procs[p].stderr.read())
+                    print(procs[p].communicate())
                     exit(1)
                 procs[p] = subprocess.Popen(cuts[i], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 # print(procs[p], "issued. PID:", procs[p].pid)
@@ -268,7 +268,7 @@ def cut_and_merge(out_filename):
     
     out_filename += "_" + hour + "-" + minute + "-" + secs + video_path[-4:]
     
-    cmd = ["ffmpeg", "-f", "concat", "-i", mergelist_path, "-c", "copy", out_filename, "-y"]
+    cmd = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-f", "concat", "-i", mergelist_path, "-c", "copy", out_filename, "-y"]
     subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE).wait()
 
 
