@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # you can prepare the training dataset like so:
 # ffmpeg -i full.wav -f segment -segment_time 1 -c copy out%03d.wav
-# and then manually dividing the speech from emh(s) into separate folders
+# and then manually dividing the speech from ehm(s) into separate folders
 import os
 import io
 import pathlib
@@ -39,6 +39,7 @@ parser.add_argument("--crf", type=int, default=-1, help="CRF factor for h264 enc
 parser.add_argument("--spectrogram", default=False, action='store_true', help="print spectrogram of window_size sliding by window_slide during analysis (debubbing only)")
 parser.add_argument("--generate-training-data", default=False, action='store_true', help="export extracted ehm(s) and silences as well to a separate folder. Useful for training on false positives")
 parser.add_argument("--srt", default=False, action='store_true', help="generate subtitle track for easier accuracy evaluation")
+parser.add_argument("--keep", nargs="+", default=["speech"], help="space separated tags to to be kept in the final video. Eg: ehm silence. Default: speech")
 
 args = parser.parse_args()
 video_path = args.filename
@@ -48,7 +49,9 @@ tmp_folder = "tmp"
 td_folder = "training_data"
 _perf = dict()
 stats = None
-labels = ["emh", "silence", "speech"]
+labels = ["ehm", "silence", "speech"]
+keep = set()
+trash = set()
 
 cuts = []       # edits for ffmpeg to split
 mergelist = []  # files for ffmpeg to merge back
@@ -136,10 +139,10 @@ def generate_cut(ss, to, count):
  
 @timeit
 def analyze_track(model, waveform, sample_rate):
-    global cuts, mergelist, pbar, audio_len, labels, stats
+    global cuts, mergelist, pbar, audio_len, labels, stats, keep, trash
 
     # state vars for analysis loop
-    lastc = 1               # last seen class
+    lastc = -1               # last seen class
     lasts = 0              # last visited second
     lastts = "00:00:00.000" # last cut was at this timestamp
     count = 0               # number of subtitle records
@@ -168,6 +171,9 @@ def analyze_track(model, waveform, sample_rate):
         cls = int(tf.math.argmax(prediction[0]))
         conf = float(tf.nn.softmax(prediction[0])[cls])
 
+        if lastc == -1:
+            lastc = cls
+            continue
      
         # generate cut when we know the end of it (or the track is at its end)
         if cls != lastc or i == last_i:
@@ -180,8 +186,8 @@ def analyze_track(model, waveform, sample_rate):
                 ts += ".000"
             # if the window slide is overlapping the previous analyzed window
             # and prediction has changed, don't generate a new cut until we are over it
-            # ...unless an "emh" is detected! [don't truncate last detected ehm]
-            if labels[cls] != "emh" and i < lastwf and i < last_i:
+            # ...unless an undesired item is detected! 
+            if labels[cls] not in trash and i < lastwf and i < last_i:
                 continue
             # generate subtitles
             record = str(count) + "\n" + lastts.replace('.',',') + " --> " + \
@@ -193,7 +199,7 @@ def analyze_track(model, waveform, sample_rate):
             stats[lastc][1] += s - lasts
             lasts = s
             # generate cut
-            if labels[lastc] == "speech":
+            if labels[lastc] in keep:
                 generate_cut(lastts, ts, count)
             elif args.generate_training_data:
                 generate_tdata(lastts, ts, count, labels[lastc])
@@ -271,6 +277,9 @@ if __name__ == '__main__':
 
     if args.generate_training_data:
         td_folder_init() 
+
+    keep = set(args.keep)
+    trash = set(labels) - keep
 
     model = tf.keras.models.load_model('model')
     wav_path = convert_input(video_path)
