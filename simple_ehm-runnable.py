@@ -105,7 +105,7 @@ def get_spectrogram(waveform, seek, window_size):
     else:
         equal_length = tf.concat([waveform, zero_padding], 0)
     # print("from:", seek, "to", seek+window_size)
-    spectrogram = tf.signal.stft(equal_length, frame_length=255, frame_step=128)
+    spectrogram = tf.signal.stft(equal_length, frame_length=255, frame_step=128, pad_end=True)
     spectrogram = tf.abs(spectrogram)
 
     return spectrogram
