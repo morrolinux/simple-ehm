@@ -1,0 +1,6 @@
+matplotlib
+seaborn
+tensorflow
+tqdm
+psutil
+opencv-python
