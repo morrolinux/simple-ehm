@@ -16,15 +16,15 @@ This script requires `ffmpeg`.
 ## Linux
 - Install `ffpmeg` with your package manager (Ex: `sudo apt install ffmpeg` for debian-based distros).
 - In your installation folder:
-  `git clone https://github.com/morrolinux/simple-ehm`
-  `cd simple-ehm`
+  `git clone https://github.com/morrolinux/simple-ehm`<br>
+  `cd simple-ehm`<br>
   `pip3 install -r requirements.txt`
 
 ## Windows
 - Follow the [guide about ffmpeg installation](https://blog.gregzaal.com/how-to-install-ffmpeg-on-windows/)
 - In your installation folder:
-  `git clone https://github.com/morrolinux/simple-ehm`
-  `cd simple-ehm`
+  `git clone https://github.com/morrolinux/simple-ehm`<br>
+  `cd simple-ehm`<br>
   `pip3 install -r requirements.txt`
 
 **NB**: You may need to remove the *MAX_PATH limitation* in order to install dependencies, follow [this official guide](https://docs.python.org/3.7/using/windows.html#removing-the-max-path-limitation).
@@ -61,14 +61,14 @@ Per utilizzare il software è necessario installare `ffmpeg`.
 ## Linux
 - Installare `ffpmeg` mediante il gestore pacchetti della vostra distribuzione (Es: `sudo apt install ffmpeg` per debian derivate).
 - Nella cartella in cui si desidera installare:
-  `git clone https://github.com/morrolinux/simple-ehm`
-  `cd simple-ehm`
+  `git clone https://github.com/morrolinux/simple-ehm` <br>
+  `cd simple-ehm`<br>
   `pip3 install -r requirements.txt`
 ## Windows
 - Seguire la [guida di installazione di ffmpeg](https://blog.gregzaal.com/how-to-install-ffmpeg-on-windows/)
 - Nella cartella in cui si desidera installare:
-  `git clone https://github.com/morrolinux/simple-ehm`
-  `cd simple-ehm`
+  `git clone https://github.com/morrolinux/simple-ehm`<br>
+  `cd simple-ehm`<br>
   `pip3 install -r requirements.txt`
 
 **NB**: Per installare le dipendenze potrebbe essere necessario rimuovere il *MAX_PATH limitation*, seguire [questa guida ufficiale](https://docs.python.org/3.7/using/windows.html#removing-the-max-path-limitation) (aprire l'editor registri e navigare al suo interno per trovare l'etichetta).
