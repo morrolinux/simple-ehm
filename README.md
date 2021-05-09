@@ -15,14 +15,14 @@ This script requires `ffmpeg`.
 
 ## Linux
 - Install `ffpmeg` with your package manager (Ex: `sudo apt install ffmpeg` for debian-based distros).
-- In your installation folder:
+- In your installation folder:<br>
   `git clone https://github.com/morrolinux/simple-ehm`<br>
   `cd simple-ehm`<br>
   `pip3 install -r requirements.txt`
 
 ## Windows
 - Follow the [guide about ffmpeg installation](https://blog.gregzaal.com/how-to-install-ffmpeg-on-windows/)
-- In your installation folder:
+- In your installation folder:<br>
   `git clone https://github.com/morrolinux/simple-ehm`<br>
   `cd simple-ehm`<br>
   `pip3 install -r requirements.txt`
@@ -60,13 +60,13 @@ Per utilizzare il software è necessario installare `ffmpeg`.
 
 ## Linux
 - Installare `ffpmeg` mediante il gestore pacchetti della vostra distribuzione (Es: `sudo apt install ffmpeg` per debian derivate).
-- Nella cartella in cui si desidera installare:
+- Nella cartella in cui si desidera installare:<br>
   `git clone https://github.com/morrolinux/simple-ehm` <br>
   `cd simple-ehm`<br>
   `pip3 install -r requirements.txt`
 ## Windows
 - Seguire la [guida di installazione di ffmpeg](https://blog.gregzaal.com/how-to-install-ffmpeg-on-windows/)
-- Nella cartella in cui si desidera installare:
+- Nella cartella in cui si desidera installare:<br>
   `git clone https://github.com/morrolinux/simple-ehm`<br>
   `cd simple-ehm`<br>
   `pip3 install -r requirements.txt`
