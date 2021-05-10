@@ -2,3 +2,5 @@ trainingset/*
 training_data/*
 tmp/*
 .ipynb_checkpoints/*
+*.mp4
+*.mkv

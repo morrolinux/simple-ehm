@@ -125,7 +125,20 @@ def generate_tdata(ss, to, count, label):
 
 def generate_cut(ss, to, count):
     out_name = str(count) + video_path[-4:]
-    cuts.append(["ffmpeg", "-hide_banner", "-loglevel", "error", "-ss", ss ,"-i", video_path,  "-to", to, "-copyts"])
+    
+    tmp = datetime.datetime.strptime(ss, '%H:%M:%S.%f')
+    seconds = (tmp.hour * 60 + tmp.minute) * 60 + tmp.second
+
+    if (seconds > 10):
+		## calculate a safe place for non accurate point 5 seconds before, then it takes an accurate point for ss. For speed porpouse
+        safe = tmp - datetime.timedelta(seconds=5)
+        safe = safe.strftime("%H:%M:%S.%f")[:-3]
+        cuts.append(["ffmpeg", "-hide_banner", "-loglevel", "error", "-ss", safe, "-i", video_path, "-ss", ss, "-to", to, "-copyts"])
+
+    else:
+        cuts.append(["ffmpeg", "-hide_banner", "-loglevel", "error","-i", video_path,  "-ss", ss , "-to", to, "-copyts"])
+
+
     if args.crf > 0:
         cuts[-1].extend(["-crf", str(args.crf)])
     if args.fps > 0:
@@ -135,6 +148,7 @@ def generate_cut(ss, to, count):
         cuts[-1].extend(["-c:a", "copy", "-c:v", "copy", "-avoid_negative_ts", "1"])
     else:
         cuts[-1].extend(["-c:v", "libx264", "-crf", "23"])
+
     cuts[-1].extend([tmp_folder + "/" + out_name, "-y"])
     mergelist.append("file '" + out_name + "'")
  
