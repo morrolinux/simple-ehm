@@ -24,6 +24,7 @@ filename:	video file name (or full file path) to classify
 --srt: 	generate subtitle track for easier accuracy evaluation
 --keep:	space separated tags to to be kept in the final video. Eg: ehm silence. Default: speech
 --name:	output video name
+--keep-junk:	keeps tmp files
 ```
 
 # Install
@@ -85,6 +86,7 @@ filename:	video file name (or full file path) to classify
 --srt: 	generate subtitle track for easier accuracy evaluation
 --keep:	space separated tags to to be kept in the final video. Eg: ehm silence. Default: speech
 --name:	output video name
+--keep-junk:	keeps tmp files
 ```
 
 # Installazione
