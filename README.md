@@ -12,18 +12,18 @@ For more info read the help:
 
 ## Arguments:
 ```text
-    filename	               video file name (or full file path) to classify
-    --fastcut	               cut and merge an mp4 video without re-encoding using an edit list.
-    --window-size-divide	   divide window size (default: 1s) by this factor
-    --window-slide-divide	   divide the window slide by this factor (default: half the window size)
-    --fps	                   frames per second of the encoded video. Lower FPS mean faster encoding (default: original)
-    --crf	                   CRF factor for h264 encoding.
-    --spectrogram	           print spectrogram of window_size sliding by window_slide during analysis (debubbing only)
-    --generate-training-data  export extracted ehm(s) and silences as well to a separate folder. Useful for training on false positives)
-    --srt 	                   generate subtitle track for easier accuracy evaluation
-    --keep	                   space separated tags to to be kept in the final video. Eg: ehm silence. Default: speech
-    --output	               output video name
-    --keep-junk               keeps tmp files
+    filename                    video file name (or full file path) to classify
+    --fastcut                   cut and merge an mp4 video without re-encoding using an edit list.
+    --window-size-divide        divide window size (default: 1s) by this factor
+    --window-slide-divide       divide the window slide by this factor (default: half the window size)
+    --fps                       frames per second of the encoded video. Lower FPS mean faster encoding (default: original)
+    --crf                       CRF factor for h264 encoding.
+    --spectrogram               print spectrogram of window_size sliding by window_slide during analysis (debubbing only)
+    --generate-training-data    export extracted ehm(s) and silences as well to a separate folder. Useful for training on false positives)
+    --srt                       generate subtitle track for easier accuracy evaluation
+    --keep                      space separated tags to to be kept in the final video. Eg: ehm silence. Default: speech
+    --output                    output video name
+    --keep-junk                 keeps tmp files
 ```
 
 # Install
@@ -77,18 +77,18 @@ Per maggiori informazioni sui parametri accettati, leggi la guida:
 
 ## Argomenti:
 ```text
-    filename	               video file name (or full file path) to classify
-    --fastcut	               cut and merge an mp4 video without re-encoding using an edit list.
-    --window-size-divide	   divide window size (default: 1s) by this factor
-    --window-slide-divide	   divide the window slide by this factor (default: half the window size)
-    --fps	                   frames per second of the encoded video. Lower FPS mean faster encoding (default: original)
-    --crf	                   CRF factor for h264 encoding.
-    --spectrogram	           print spectrogram of window_size sliding by window_slide during analysis (debubbing only)
-    --generate-training-data  export extracted ehm(s) and silences as well to a separate folder. Useful for training on false positives)
-    --srt 	                   generate subtitle track for easier accuracy evaluation
-    --keep	                   space separated tags to to be kept in the final video. Eg: ehm silence. Default: speech
-    --output	               output video name
-    --keep-junk               keeps tmp files
+    filename                    video file name (or full file path) to classify
+    --fastcut                   cut and merge an mp4 video without re-encoding using an edit list.
+    --window-size-divide        divide window size (default: 1s) by this factor
+    --window-slide-divide       divide the window slide by this factor (default: half the window size)
+    --fps                       frames per second of the encoded video. Lower FPS mean faster encoding (default: original)
+    --crf                       CRF factor for h264 encoding.
+    --spectrogram               print spectrogram of window_size sliding by window_slide during analysis (debubbing only)
+    --generate-training-data    export extracted ehm(s) and silences as well to a separate folder. Useful for training on false positives)
+    --srt                       generate subtitle track for easier accuracy evaluation
+    --keep                      space separated tags to to be kept in the final video. Eg: ehm silence. Default: speech
+    --output                    output video name
+    --keep-junk                 keeps tmp files
 ```
 
 # Installazione
