@@ -6,6 +6,7 @@ import os
 import io
 import pathlib
 import argparse
+import signal
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -41,6 +42,7 @@ parser.add_argument("--generate-training-data", default=False, action='store_tru
 parser.add_argument("--srt", default=False, action='store_true', help="generate subtitle track for easier accuracy evaluation")
 parser.add_argument("--keep", nargs="+", default=["speech"], help="space separated tags to to be kept in the final video. Eg: ehm silence. Default: speech")
 parser.add_argument("--output", type=str, default="", help="Output video name")
+parser.add_argument("--keep-junk", default=False,action="store_true", help="keeps tmp files")
 
 args = parser.parse_args()
 video_path = args.filename
@@ -56,6 +58,23 @@ trash = set()
 
 cuts = []       # edits for ffmpeg to split
 mergelist = []  # files for ffmpeg to merge back
+
+# ctrl+c handler
+def signal_handler(sig, frame):
+    try:
+        filename, file_extension = os.path.splitext(video_path)
+        if(not args.keep_junk):
+            os.remove(f'{filename}.wav')
+            for file in os.listdir("tmp"):
+                os.remove("tmp/"+file)
+
+    except Exception as e:
+        pass
+
+    exit()
+
+signal.signal(signal.SIGINT, signal_handler)
+
 
 def plot_spectrogram(spectrogram, ax):
   # Convert to frequencies to log scale and transpose so that the time is
@@ -279,6 +298,9 @@ def cut_and_merge(out_filename):
 
 
 if __name__ == '__main__':
+    if (not os.path.isfile(args.filename)):
+       raise Exception(f"Error! {args.filename} doesn't exists.")
+
     with suppress(FileExistsError): os.mkdir(tmp_folder)
 
     if args.generate_training_data:
@@ -298,7 +320,10 @@ if __name__ == '__main__':
     analyze_track(model, waveform, sample_rate)
     cut_and_merge(video_path[:-4])
     
-    os.remove(wav_path)
+    if(not args.keep_junk):
+        os.remove(wav_path)
+        for file in os.listdir("tmp"):
+            os.remove("tmp/"+file)
 
     print("\nFATTO!")
     for k, v in zip(_perf.keys(), _perf.values()):
