@@ -40,6 +40,7 @@ parser.add_argument("--spectrogram", default=False, action='store_true', help="p
 parser.add_argument("--generate-training-data", default=False, action='store_true', help="export extracted ehm(s) and silences as well to a separate folder. Useful for training on false positives")
 parser.add_argument("--srt", default=False, action='store_true', help="generate subtitle track for easier accuracy evaluation")
 parser.add_argument("--keep", nargs="+", default=["speech"], help="space separated tags to to be kept in the final video. Eg: ehm silence. Default: speech")
+parser.add_argument("--output", type=str, default="", help="Output video name")
 
 args = parser.parse_args()
 video_path = args.filename
@@ -266,8 +267,13 @@ def cut_and_merge(out_filename):
     minute = str(datetime.datetime.now().minute)
     secs = str(datetime.datetime.now().second)
     
-    out_filename += "_" + hour + "-" + minute + "-" + secs + video_path[-4:]
+    if(args.output == ""):
+    	out_filename += "_" + hour + "-" + minute + "-" + secs 
     
+    else:
+        path = os.path.dirname(os.path.abspath(video_path))
+        out_filename = os.path.abspath(path+"/"+args.output)
+	    
     cmd = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-f", "concat", "-i", mergelist_path, "-c", "copy", out_filename, "-y"]
     subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE).wait()
 
