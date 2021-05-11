@@ -273,6 +273,9 @@ def cut_and_merge(out_filename):
 
 
 if __name__ == '__main__':
+    if (not os.path.isfile(args.filename)):
+       raise Exception(f"Error! {args.filename} doesn't exists.")
+
     with suppress(FileExistsError): os.mkdir(tmp_folder)
 
     if args.generate_training_data:
