@@ -143,7 +143,7 @@ def generate_tdata(ss, to, count, label):
 
 def generate_cut(ss, to, count):
     out_name = str(count) + video_path[-4:]
-    cuts.append(["ffmpeg", "-hide_banner", "-loglevel", "error", "-ss", ss ,"-i", video_path,  "-to", to, "-copyts"])
+    cuts.append(["ffmpeg", "-hide_banner", "-loglevel", "error", "-ss", ss ,"-i", video_path,  "-ss", ss,  "-to", to, "-copyts"])
     if args.crf > 0:
         cuts[-1].extend(["-crf", str(args.crf)])
     if args.fps > 0:
