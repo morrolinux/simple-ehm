@@ -5,7 +5,7 @@ Istruzioni in italiano in fondo al documento.
 # Usage
 Basic invokation should be enough:
 `./simple_emh-runnable.py /path/to/video/file`
-This will generate a subtilte track (`.srt`) for debugging and the output video in the same folder as the original file.
+This will generate a subtitle track (`.srt`) for debugging and the output video in the same folder as the original file.
 
 For more info read the help:
 `./simple_emh-runnable.py --help`
