@@ -1,6 +1,6 @@
 matplotlib
 seaborn
-tensorflow
+tensorflow==2.6.2
 tqdm
 psutil
 opencv-python
