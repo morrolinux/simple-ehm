@@ -10,8 +10,8 @@ This will generate a subtitle track (`.srt`) for debugging and the output video 
 For more info read the help:
 `./simple_emh-runnable.py --help`
 
-You can also run simple-ehm in a dockerized environment. Simply use the Dockerfile to build the image then, instead of
-using `./simple_ehm-runnable.py` use `./convert.sh`
+You can also run simple-ehm in a dockerized environment. Build the image using `docker build -t simple .` then, instead
+of using `./simple_ehm-runnable.py` use `./convert.sh`
 
 # Contributing to the model
 There are two ways you can contribute to the model:
@@ -39,8 +39,9 @@ Questo genererò una traccia di sottotitoli (`.srt`) per fini diagnostici e il v
 Per maggiori informazioni sui parametri accettati, leggi la guida:
 `./simple_emh-runnable.py --help`
 
-Puoi anche utilizzare simple-ehm in un ambiente dockerizzato, per fare ciò, dove useresti `./simple_ehm-runnable.py`
-utilizza invece `./convert.sh` (N.B. per usare `./convert.sh` i file devono essere spostati prima in questa cartella)
+Puoi anche utilizzare simple-ehm in un ambiente dockerizzato, per fare ciò crea l'immagine `docker build -t simple .`, e
+dove useresti `./simple_ehm-runnable.py` utilizza invece `./convert.sh` (N.B. per usare `./convert.sh` i file devono
+essere spostati prima in questa cartella)
 
 # Contribuire al modello
 Ci sono due modi in cui puoi contribuire al modello:
