@@ -1,6 +1,7 @@
+tensorflow==2.6.2
 matplotlib
 seaborn
-tensorflow==2.6.2
 tqdm
 psutil
 opencv-python
+protobuf==3.20.0
