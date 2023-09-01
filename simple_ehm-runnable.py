@@ -15,6 +15,9 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 import tensorflow as tf
 
 from tensorflow.keras.layers.experimental import preprocessing
+from tensorflow.keras.layers import Reshape
+from tensorflow.keras import models  
+
 from tensorflow.keras import layers
 from tensorflow.keras import models
 
@@ -27,6 +30,11 @@ import psutil
 import subprocess
 import cv2
 from contextlib import suppress
+
+model = models.Sequential([  # Usa models invece di model
+    Reshape((124, 129, 1), input_shape=(124, 129, 1)),
+])
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument("filename", help="video file name (or full file path) to classify")
@@ -115,7 +123,7 @@ def get_spectrogram(waveform, seek, window_size):
         zero_padding = tf.zeros([window_size] - tf.shape(waveform), dtype=tf.float32)
     else:
         zero_padding = tf.zeros(0, dtype=tf.float32)
-  
+
     # Concatenate audio with padding so that all audio clips will be of the 
     # same length
     waveform = tf.cast(waveform, tf.float32)
@@ -123,9 +131,20 @@ def get_spectrogram(waveform, seek, window_size):
         equal_length = waveform[seek:seek+window_size]
     else:
         equal_length = tf.concat([waveform, zero_padding], 0)
-    # print("from:", seek, "to", seek+window_size)
+    
+    # Calculate the spectrogram with the correct frame size
     spectrogram = tf.signal.stft(equal_length, frame_length=255, frame_step=128, pad_end=True)
     spectrogram = tf.abs(spectrogram)
+
+    # Trim or pad the spectrogram to the desired shape
+    if tf.shape(spectrogram)[0] > 124:
+        spectrogram = spectrogram[:124, :]
+    else:
+        pad_size = 124 - tf.shape(spectrogram)[0]
+        spectrogram = tf.pad(spectrogram, [(0, pad_size), (0, 0)])
+
+    # Add the channel dimension
+    spectrogram = tf.expand_dims(spectrogram, axis=-1)
 
     return spectrogram
 
