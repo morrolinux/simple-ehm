@@ -4,4 +4,4 @@ seaborn
 tqdm
 psutil
 opencv-python
-protobuf==3.20.0
+protobuf==3.20.3
