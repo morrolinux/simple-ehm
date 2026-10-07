@@ -11,7 +11,8 @@ a = Analysis(
         ("model.keras.version", "."),
     ],
     hiddenimports=["i18n", "update", "version"],
-    excludes=["matplotlib", "seaborn", "cv2", "IPython", "notebook"],
+    excludes=["matplotlib", "seaborn", "cv2", "IPython", "notebook",
+              "torch", "torchvision", "torchaudio", "pandas", "scipy", "jax"],
     noarchive=False,
 )
 pyz = PYZ(a.pure)

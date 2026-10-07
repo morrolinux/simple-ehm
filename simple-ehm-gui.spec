@@ -12,7 +12,8 @@ a = Analysis(
         ("simple_ehm-runnable.py", "."),
     ],
     hiddenimports=["i18n", "update", "version"],
-    excludes=["matplotlib", "seaborn", "IPython", "notebook"],
+    excludes=["matplotlib", "seaborn", "IPython", "notebook", "tensorflow",
+              "keras", "numpy", "cv2", "torch", "pandas", "scipy"],
     noarchive=False,
 )
 pyz = PYZ(a.pure)
