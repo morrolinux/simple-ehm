@@ -12,6 +12,7 @@
   "gui_browse": "Browse…",
   "gui_model": "Model",
   "gui_device": "Device",
+  "gui_encoder": "Video encoder",
   "gui_lang": "Language",
   "gui_fastcut": "Fast cut (no re-encode)",
   "gui_srt": "Generate .srt subtitles",

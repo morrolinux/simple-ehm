@@ -76,6 +76,11 @@ parser.add_argument("--concat-only", default=False, action="store_true",
                     "(useful to resume an interrupted merge)")
 parser.add_argument("--device", default="auto", choices=["auto", "cpu", "gpu"],
                     help="compute device for TF inference (default: auto = GPU if available, else CPU)")
+parser.add_argument("--encoder", default="auto", choices=["auto", "libx264", "h264_nvenc"],
+                    help="video encoder for re-encode cuts (default: auto = NVENC if NVIDIA "
+                    "encoder available, else libx264; ignored with --fastcut)")
+parser.add_argument("--list-devices", default=False, action="store_true",
+                    help="print detected GPUs / NVENC support and exit")
 parser.add_argument("--lang", default="auto", choices=["auto", "it", "en"],
                     help="interface language (default: auto from system locale)")
 
@@ -174,6 +179,53 @@ def configure_device(mode: str = "auto") -> str:
         pass
     print(T("cpu_on", "Using CPU for inference."))
     return "cpu"
+
+
+def _detect_nvenc() -> bool:
+    """True if this ffmpeg build supports NVIDIA NVENC encoding."""
+    try:
+        r = subprocess.run(["ffmpeg", "-hide_banner", "-h", "encoder=h264_nvenc"],
+                           stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                           stderr=subprocess.DEVNULL)
+        return r.returncode == 0
+    except Exception:
+        return False
+
+
+_NVENC = None
+
+
+def resolve_encoder() -> str:
+    """Pick encoder: explicit choice, or NVENC when available (auto)."""
+    global _NVENC
+    if args.encoder != "auto":
+        return args.encoder
+    if _NVENC is None:
+        _NVENC = _detect_nvenc()
+    return "h264_nvenc" if _NVENC else "libx264"
+
+
+def list_devices() -> str:
+    """One-shot diagnostic: GPUs visible to TF + NVENC + recommendation."""
+    err = ""
+    try:
+        gpus = tf.config.list_physical_devices("GPU")
+    except Exception as e:
+        gpus = []
+        err = f" ({e})"
+    names = [getattr(g, "name", str(g)) for g in gpus]
+    nvenc = _detect_nvenc()
+    if names:
+        rec = "gpu inference + " + ("h264_nvenc" if nvenc else "libx264")
+    elif nvenc:
+        rec = "cpu inference + h264_nvenc (encode-only)"
+    else:
+        rec = "cpu inference + libx264"
+    return "\n".join([
+        f"tensorflow gpus: {names if names else 'none' + err}",
+        f"ffmpeg nvenc: {'yes' if nvenc else 'no'}",
+        f"recommended: --device auto --encoder auto  ->  {rec}",
+    ])
 
 
 def ensure_model(model_arg: str, model_url: str = "", no_download: bool = False) -> Path:
@@ -403,7 +455,7 @@ def generate_cut(ss, to, count):
     if args.fastcut:
         cmd.extend(["-c:a", "copy", "-c:v", "copy", "-avoid_negative_ts", "1"])
     else:
-        cmd.extend(["-c:v", "libx264", "-crf", "23"])
+        cmd.extend(["-c:v", resolve_encoder(), "-crf", "23"])
     cmd.extend([str(tmp_folder / out_name), "-y"])
     cuts.append(cmd)
     mergelist.append("file '" + out_name + "'")
@@ -546,6 +598,10 @@ def concat_inputs(mergelist_path: Path, out_stem: Path):
 
 
 if __name__ == '__main__':
+    if args.list_devices:
+        print(list_devices())
+        raise SystemExit(0)
+
     if video_path is None or not video_path.is_file():
         parser.print_usage(sys.stderr)
         raise SystemExit(f"Error! {video_path} doesn't exist.")

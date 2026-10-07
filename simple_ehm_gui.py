@@ -59,6 +59,20 @@ class App(tk.Tk):
         self._build()
         self._refresh_texts()
         self.after(100, self._poll_log)
+        threading.Thread(target=self._refresh_hw, daemon=True).start()
+
+    def _refresh_hw(self):
+        """Show what the PC can use (TF GPUs + NVENC) without loading the GUI."""
+        try:
+            out = subprocess.run(
+                _find_cli() + ["--list-devices"], capture_output=True, text=True,
+                errors="replace", timeout=120,
+                cwd=(str(Path(sys.executable).resolve().parent) if FROZEN
+                     else str(BASE_DIR)))
+            txt = (out.stdout or out.stderr or "").strip().replace("\n", " · ")
+            self.after(0, lambda: self.lbl_hw.config(text=txt or "hw check failed"))
+        except Exception as e:
+            self.after(0, lambda: self.lbl_hw.config(text=f"hw check failed: {e}"))
 
     def T(self, key: str) -> str:
         return self.strings.get(key, key)
@@ -73,6 +87,7 @@ class App(tk.Tk):
         self.var_file = tk.StringVar()
         self.var_model = tk.StringVar(value=str(BASE_DIR / "model.keras"))
         self.var_device = tk.StringVar(value="auto")
+        self.var_encoder = tk.StringVar(value="auto")
         self.var_keep = tk.StringVar(value="speech")
         self.var_ws = tk.StringVar(value="1")
         self.var_wsl = tk.StringVar(value="2")
@@ -109,6 +124,17 @@ class App(tk.Tk):
         ttk.Combobox(frm, textvariable=self.lang, values=["it", "en"],
                      width=5, state="readonly").grid(row=r, column=1, sticky="e")
         self.lang.trace_add("write", lambda *_: self._refresh_texts())
+        r += 1
+
+        # encoder (ffmpeg GPU) + detected status
+        self.lbl_encoder = ttk.Label(frm, text="Encoder")
+        self.lbl_encoder.grid(row=r, column=0, sticky="w")
+        ttk.Combobox(frm, textvariable=self.var_encoder,
+                     values=["auto", "libx264", "h264_nvenc"],
+                     width=12, state="readonly").grid(row=r, column=1, sticky="w")
+        r += 1
+        self.lbl_hw = ttk.Label(frm, text="…", foreground="gray")
+        self.lbl_hw.grid(row=r, column=0, columnspan=3, sticky="w")
         r += 1
 
         # options grid
@@ -163,6 +189,7 @@ class App(tk.Tk):
         self.btn_browse.config(text=self.T("gui_browse"))
         self.lbl_model.config(text=self.T("gui_model"))
         self.lbl_device.config(text=self.T("gui_device"))
+        self.lbl_encoder.config(text=self.T("gui_encoder"))
         self.lbl_lang.config(text=self.T("gui_lang"))
         self.cb_fast.config(text=self.T("gui_fastcut"))
         self.cb_srt.config(text=self.T("gui_srt"))
@@ -204,7 +231,7 @@ class App(tk.Tk):
         if self.var_file.get():
             cmd.append(self.var_file.get())
         cmd += ["--model", self.var_model.get(), "--device", self.var_device.get(),
-                "--lang", self.lang.get(),
+                "--encoder", self.var_encoder.get(), "--lang", self.lang.get(),
                 "--window-size-divide", self.var_ws.get(),
                 "--window-slide-divide", self.var_wsl.get(),
                 "--fps", self.var_fps.get(), "--crf", self.var_crf.get(),

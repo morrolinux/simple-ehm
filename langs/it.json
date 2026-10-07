@@ -12,6 +12,7 @@
   "gui_browse": "Sfoglia…",
   "gui_model": "Modello",
   "gui_device": "Dispositivo",
+  "gui_encoder": "Encoder video",
   "gui_lang": "Lingua",
   "gui_fastcut": "Taglio veloce (senza ricodifica)",
   "gui_srt": "Genera sottotitoli .srt",
