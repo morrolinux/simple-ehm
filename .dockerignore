@@ -1,0 +1,8 @@
+__pycache__/
+tmp/
+training_data/
+trainingset/
+.git
+*.MP4
+*.wav
+*.srt

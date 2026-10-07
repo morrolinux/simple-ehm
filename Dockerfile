@@ -1,9 +1,9 @@
-FROM python:3.9-slim
-RUN apt update
-RUN apt install libgl1-mesa-glx -y
-RUN apt install libglib2.0-0 -y
-RUN apt install ffmpeg -y
+FROM python:3.11-slim
+RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg \
+ && rm -rf /var/lib/apt/lists/*
 RUN mkdir /simple_ehm
 WORKDIR /simple_ehm
-ADD . .
-RUN pip install -r requirements.txt
+COPY . .
+RUN pip install --no-cache-dir -r requirements.txt
+ENTRYPOINT ["python", "./simple_ehm-runnable.py"]
+CMD ["--help"]
