@@ -20,7 +20,11 @@ Output video + `.srt` debug track are written next to the original file.
 - **Modern stack:** Python 3.10–3.13, TensorFlow 2.16–2.21 / Keras 3, Windows + Linux.
 - **NVIDIA GPU auto:** `--device auto` (default) uses the GPU when TensorFlow sees
   one (memory growth + mixed precision), else CPU. `--device cpu|gpu` to force.
-  Note: native Windows TF is CPU-only; for GPU use Linux + CUDA or WSL2.
+  `--encoder auto` (default) uses `h264_nvenc` when your ffmpeg supports it,
+  else `libx264` (ignored with `--fastcut`). `--list-devices` prints what
+  your PC can use (TF GPUs + NVENC) and the recommended combo.
+  Note: native Windows TF is CPU-only; for GPU inference use Linux + CUDA
+  or WSL2 (NVENC encoding works on Windows too).
 - **Auto language:** IT/EN picked from the PC (Windows API / POSIX locale),
   override with `--lang it|en` or `SIMPLE_EHM_LANG`. GUI language menu included.
   Strings live in `langs/*.json` – add a file to add a language.
@@ -69,7 +73,10 @@ python simple_ehm-runnable.py /percorso/al/video.mp4 --srt --fastcut
 ```
 
 - **GPU NVIDIA automatica:** `--device auto` usa la GPU se TensorFlow la vede,
-  altrimenti CPU. Su Windows nativo solo CPU; per la GPU serve Linux + CUDA o WSL2.
+  altrimenti CPU. `--encoder auto` usa `h264_nvenc` se il tuo ffmpeg lo
+  supporta, altrimenti `libx264`. `--list-devices` dice cosa può usare il PC.
+  Su Windows nativo inferenza solo CPU; per la GPU serve Linux + CUDA o WSL2
+  (l'encoding NVENC funziona anche su Windows).
 - **Lingua automatica:** IT/EN dal PC (API Windows / locale Linux),
   `--lang it|en` o `SIMPLE_EHM_LANG` per forzare.
 - **Modelli da GitHub:** al primo avvio scarica `model.keras` solo se manca o è
