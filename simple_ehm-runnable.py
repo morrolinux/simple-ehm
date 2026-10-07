@@ -74,6 +74,8 @@ parser.add_argument("--keep-junk", default=False, action="store_true", help="kee
 parser.add_argument("--concat-only", default=False, action="store_true",
                     help="skip analysis/cut, concat existing tmp/inputs.txt "
                     "(useful to resume an interrupted merge)")
+parser.add_argument("--no-output", default=False, action="store_true",
+                    help="analysis only: skip cut/merge, keep .srt and/or training data")
 parser.add_argument("--device", default="auto", choices=["auto", "cpu", "gpu"],
                     help="compute device for TF inference (default: auto = GPU if available, else CPU)")
 parser.add_argument("--encoder", default="auto", choices=["auto", "libx264", "h264_nvenc"],
@@ -240,16 +242,12 @@ def ensure_model(model_arg: str, model_url: str = "", no_download: bool = False)
     url = (model_url or "").strip() or BUILTIN_MODEL_URL
     if no_download or not url:
         sys.exit(T("model_missing",
-                    f"Model not found: {p}. Pass --model or set SIMPLE_EHM_MODEL_URL."));
+                    f"Model not found: {p}. Pass --model or set SIMPLE_EHM_MODEL_URL."))
     print(T("model_dl", f"Downloading model from {url} ..."))
+    tmp_dl = target.with_suffix(".keras.downloading")
     try:
         import urllib.request
         target.parent.mkdir(parents=True, exist_ok=True)
-        tmp_dl = target.with_suffix(".keras.downloading")
-
-        def _hook(block, bsize, total):
-            pass  # keep quiet; tqdm not easily hookable here w/o extra code
-
         urllib.request.urlretrieve(url, str(tmp_dl))
         if tmp_dl.stat().st_size < 100_000:
             raise RuntimeError(f"suspiciously small file ({tmp_dl.stat().st_size} B)")
@@ -439,23 +437,24 @@ def generate_tdata(ss, to, count, label):
 
 def generate_cut(ss, to, count):
     out_name = str(count) + video_path.suffix
-    # NOTE: un solo -ss. Con fastcut (stream copy) lo mettiamo prima di -i
-    # (seek veloce); con re-encode dopo -i (seek accurato al frame).
+    # Single -ss: before -i with fastcut (fast stream-copy seek),
+    # after -i when re-encoding (frame-accurate seek).
     if args.fastcut:
         cmd = ["ffmpeg", "-hide_banner", "-loglevel", "error",
                "-ss", ss, "-to", to, "-i", str(video_path), "-copyts"]
     else:
         cmd = ["ffmpeg", "-hide_banner", "-loglevel", "error",
                "-i", str(video_path), "-ss", ss, "-to", to, "-copyts"]
-    if args.crf > 0:
-        cmd.extend(["-crf", str(args.crf)])
-    if args.fps > 0:
-        cmd.extend(["-filter:v", "fps=fps=" + str(args.fps)])
-
     if args.fastcut:
+        # stream copy: no filters / quality settings possible
         cmd.extend(["-c:a", "copy", "-c:v", "copy", "-avoid_negative_ts", "1"])
     else:
-        cmd.extend(["-c:v", resolve_encoder(), "-crf", "23"])
+        if args.fps > 0:
+            cmd.extend(["-filter:v", "fps=fps=" + str(args.fps)])
+        encoder = resolve_encoder()
+        quality = str(args.crf if args.crf > 0 else 23)
+        # NVENC has no -crf: constant quality is -cq
+        cmd.extend(["-c:v", encoder, "-cq" if encoder == "h264_nvenc" else "-crf", quality])
     cmd.extend([str(tmp_folder / out_name), "-y"])
     cuts.append(cmd)
     mergelist.append("file '" + out_name + "'")
@@ -481,7 +480,8 @@ def analyze_track(predict, waveform, sample_rate: int):
     window_slide = int(window_size / args.window_slide_divide)
 
     print("analyzing track...")
-    last_i = window_slide * int(audio_len / window_slide)
+    # index of the last window actually visited by range() below
+    last_i = window_slide * ((audio_len - 1) // window_slide)
     pbar = tqdm(total=max(last_i, 1))
     for i in range(0, audio_len, window_slide):
         pbar.update(n=min(window_slide, audio_len - i))
@@ -540,7 +540,7 @@ def analyze_track(predict, waveform, sample_rate: int):
 
 
 @timeit
-def cut_and_merge(out_stem: Path):
+def cut_and_merge(out_stem: Path, only_cuts: bool = False):
     global pbar
     if not cuts:
         print("Nothing to cut/merge (no kept segments?).")
@@ -566,10 +566,14 @@ def cut_and_merge(out_stem: Path):
     with ThreadPoolExecutor(max_workers=cores) as ex:
         futs = [ex.submit(_run_cut, c) for c in cuts]
         for f in as_completed(futs):
-            f.result()  # solleva subito in caso di errore
+            f.result()  # raise on first failure
             pbar.update(n=1)
     pbar.close()
     print("all cut processes finished.")
+
+    if only_cuts:
+        print(f"training clips saved in {td_folder}")
+        return None
 
     mergelist_path = tmp_folder / "inputs.txt"
     with open(mergelist_path, 'w', encoding='utf-8') as f:
@@ -580,9 +584,9 @@ def cut_and_merge(out_stem: Path):
 
 
 def concat_inputs(mergelist_path: Path, out_stem: Path):
-    """Concat demuxer su inputs.txt esistente (usato anche da --concat-only)."""
+    """Concat demuxer over an existing inputs.txt (also used by --concat-only)."""
     if not mergelist_path.is_file():
-        sys.exit(f"concat-only: {mergelist_path} non trovato.")
+        sys.exit(f"concat-only: {mergelist_path} not found.")
     now = datetime.datetime.now()
     out_filename = f"{out_stem}_{now.hour:02d}-{now.minute:02d}-{now.second:02d}{video_path.suffix}"
 
@@ -610,8 +614,7 @@ if __name__ == '__main__':
 
     if args.concat_only:
         out = concat_inputs(tmp_folder / "inputs.txt", video_path.with_suffix(""))
-        print("\nFATTO (concat-only)!")
-        print("saved:", out)
+        print("\n" + T("cli_done_concat", "DONE (concat-only)!"))
         raise SystemExit(0)
 
     if args.generate_training_data:
@@ -637,7 +640,12 @@ if __name__ == '__main__':
     audio_len = int(waveform.shape[0])
 
     analyze_track(predict, waveform, sample_rate)
-    cut_and_merge(video_path.with_suffix(""))
+    if args.no_output:
+        print("\n" + T("cli_done_no_output", "DONE (--no-output: no video generated)!"))
+        if args.generate_training_data:
+            cut_and_merge(video_path.with_suffix(""), only_cuts=True)
+    else:
+        cut_and_merge(video_path.with_suffix(""))
 
     if not args.keep_junk:
         with suppress(OSError):
@@ -648,9 +656,9 @@ if __name__ == '__main__':
                     if file.is_file():
                         file.unlink()
 
-    print("\nFATTO!")
+    print("\n" + T("cli_done", "DONE!"))
     for k, v in _perf.items():
-        print(k, "ha impiegato", str(v))
+        print(T("cli_took", "{name} took {time}").format(name=k, time=v))
 
     saved_time = 0.0
     print("")
@@ -658,7 +666,9 @@ if __name__ == '__main__':
         if labels[i] == "speech":
             continue
         saved_time += stats[i][1]
-        print(f"Rimosso {stats[i][0]} {labels[i]}(s) per un ammontare di "
-              f"{str(datetime.timedelta(seconds=stats[i][1]))[:8]}")
+        print(T("cli_removed", "Removed {n} {label}(s) for a total of {time}").format(
+            n=stats[i][0], label=labels[i],
+            time=str(datetime.timedelta(seconds=stats[i][1]))[:8]))
 
-    print("Tempo totale risparmiato:", str(datetime.timedelta(seconds=saved_time))[:8])
+    print(T("cli_saved_total", "Total time saved: {time}").format(
+        time=str(datetime.timedelta(seconds=saved_time))[:8]))

@@ -13,9 +13,7 @@ SUPPORTED = ("it", "en")
 
 def _norm(tag: str) -> str:
     t = (tag or "").strip().lower().replace("_", "-")
-    if t.startswith("it"):
-        return "it"
-    return "en" if not t else ("it" if t == "it" else "en")
+    return "it" if t.startswith("it") else "en"
 
 
 def detect_lang() -> str:

@@ -35,19 +35,23 @@ Output video + `.srt` debug track are written next to the original file.
   Program update check included (release tag vs `version.py`).
 - **Resume merges:** `--concat-only` re-runs only the final `ffmpeg concat`
   from `tmp/inputs.txt` (no re-analysis).
-- **GUI:** `simple_ehm_gui.py` (tkinter, stdlib only) exposes every parameter
-  with log window, Run/Stop and IT/EN switch.
+- **GUI:** `simple_ehm_gui.py` (tkinter, stdlib only): dark/light theme, IT/EN
+  switch, progress bar with phase + ETA, live log, Stop (kills ffmpeg too),
+  "Open folder" when done. Advanced options (CRF, FPS, window sizes, model,
+  training data, analysis only, concat only) in a collapsible section.
+  Settings are remembered between runs. `python simple_ehm_gui.py video.mp4`
+  pre-fills the file.
 
 ## Binaries
 
-- Windows: `build_windows.ps1` → `dist/simple-ehm.exe` (≈3,5 GB con TF),
-  `dist/simple-ehm-gui.exe` (≈16 MB). `dist/` non va su git: i binary si
-  pubblicano come asset della GitHub Release insieme a `SHA256SUMS.txt`.
-- **Prima di eseguire: verifica gli hash** come spiegato in `VERIFY.md`
-  (confronto SHA256 + Defender/VirusTotal + sandbox).
+- Windows: `build_windows.ps1` → `dist/simple-ehm.exe` (≈3.5 GB with TF),
+  `dist/simple-ehm-gui.exe` (≈16 MB). `dist/` is not tracked in git: binaries
+  are published as GitHub Release assets together with `SHA256SUMS.txt`.
+- **Before running: verify the hashes** as explained in `VERIFY.md`
+  (SHA256 + Defender/VirusTotal + sandbox).
 - Linux: `build_linux.sh` → `dist/simple-ehm`, `dist/simple-ehm-gui`.
 - Debian: `build_deb.sh` → `simple-ehm_<ver>_amd64.deb`
-  (`sudo apt install ./simple-ehm_*_amd64.deb`, anche nel menu app).
+  (`sudo apt install ./simple-ehm_*_amd64.deb`, also shows up in the app menu).
   PyInstaller specs: `simple-ehm-cli.spec`, `simple-ehm-gui.spec`.
 
 ## Publishing models (maintainers)
@@ -81,6 +85,8 @@ python simple_ehm-runnable.py /percorso/al/video.mp4 --srt --fastcut
   `--lang it|en` o `SIMPLE_EHM_LANG` per forzare.
 - **Modelli da GitHub:** al primo avvio scarica `model.keras` solo se manca o è
   più vecchio del `manifest.json` della release.
+- **GUI:** `python simple_ehm_gui.py`: tema scuro/chiaro, lingua IT/EN, barra
+  di avanzamento, registro, Ferma, "Apri cartella" e opzioni avanzate.
 - **Binary:** `build_windows.ps1` (exe), `build_linux.sh` + `build_deb.sh` (.deb).
 
 ## Contribuire al modello / dataset

@@ -7,3 +7,6 @@ dist/
 build/
 *.log
 __pycache__/
+# local scratch: candidate clips, screenshots
+review_verses/
+Screenshot*.png
