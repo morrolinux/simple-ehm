@@ -2,3 +2,11 @@ trainingset/*
 training_data/*
 tmp/*
 .ipynb_checkpoints/*
+# PyInstaller outputs: never push binaries to git (release assets only)
+dist/
+build/
+*.log
+__pycache__/
+# local scratch: candidate clips, screenshots
+review_verses/
+Screenshot*.png

@@ -1,56 +1,96 @@
 # simple-ehm
+
+![logo](assets/logo-horizontal.png)
+
 A simple tool for a simple task: remove filler sounds ("ehm") from pre-recorded speeches. AI powered.
 Istruzioni in italiano in fondo al documento.
 
-# Usage
-Basic invokation should be enough:
-`./simple_emh-runnable.py /path/to/video/file`
-This will generate a subtitle track (`.srt`) for debugging and the output video in the same folder as the original file.
+## Quick start
 
-For more info read the help:
-`./simple_emh-runnable.py --help`
+```bash
+pip install -r requirements.txt
+python simple_ehm-runnable.py /path/to/video.mp4 --srt --fastcut
+# GUI (same folder): python simple_ehm_gui.py
+```
 
-You can also run simple-ehm in a dockerized environment. Build the image using `docker build -t simple .` then, instead
-of using `./simple_ehm-runnable.py` use `./convert.sh`
+Output video + `.srt` debug track are written next to the original file.
 
-# Contributing to the model
-There are two ways you can contribute to the model:
+## Features (v2.x)
 
-## Contribute to the dataset
-By sending me at least 30 1-second long WAV pcm_s16le mono 16kHz clips for each class (silence, speech, ehm)  [easy]
-- You can convert your clips to the right format with ffmpeg: `ffmpeg -i input-file -c:a pcm_s16le -ac 1 -ar 16000 -filter:a "dynaudnorm" output.wav`
-- You can extract ehm(s) and silences **along with erroneously classified sounds** (false positives) by passing `--generate-training-data` as an invocation parameter. You can then use the latter to improve your training set!
+- **Modern stack:** Python 3.10–3.13, TensorFlow 2.16–2.21 / Keras 3, Windows + Linux.
+- **NVIDIA GPU auto:** `--device auto` (default) uses the GPU when TensorFlow sees
+  one (memory growth + mixed precision), else CPU. `--device cpu|gpu` to force.
+  `--encoder auto` (default) uses `h264_nvenc` when your ffmpeg supports it,
+  else `libx264` (ignored with `--fastcut`). `--list-devices` prints what
+  your PC can use (TF GPUs + NVENC) and the recommended combo.
+  Note: native Windows TF is CPU-only; for GPU inference use Linux + CUDA
+  or WSL2 (NVENC encoding works on Windows too).
+- **Auto language:** IT/EN picked from the PC (Windows API / POSIX locale),
+  override with `--lang it|en` or `SIMPLE_EHM_LANG`. GUI language menu included.
+  Strings live in `langs/*.json` – add a file to add a language.
+- **Models from GitHub:** first run downloads `model.keras` only if the bundled
+  one is missing or older than the release `manifest.json`
+  (`SIMPLE_EHM_REPO`, default `morrolinux/simple-ehm`).
+  Override: `--model`, `--model-url`, `SIMPLE_EHM_MODEL_URL`, `--no-download`.
+  Program update check included (release tag vs `version.py`).
+- **Resume merges:** `--concat-only` re-runs only the final `ffmpeg concat`
+  from `tmp/inputs.txt` (no re-analysis).
+- **GUI:** `simple_ehm_gui.py` (tkinter, stdlib only): dark/light theme, IT/EN
+  switch, progress bar with phase + ETA, live log, Stop (kills ffmpeg too),
+  "Open folder" when done. Advanced options (CRF, FPS, window sizes, model,
+  training data, analysis only, concat only) in a collapsible section.
+  Settings are remembered between runs. `python simple_ehm_gui.py video.mp4`
+  pre-fills the file.
 
-## Contribute to the training
-- By implementing transfer training logic on this model's python notebook
-- By retraining the current model with your dataset and make a PR with the updated one
+## Binaries
 
+- Windows: `build_windows.ps1` → `dist/simple-ehm.exe` (≈3.5 GB with TF),
+  `dist/simple-ehm-gui.exe` (≈16 MB). `dist/` is not tracked in git: binaries
+  are published as GitHub Release assets together with `SHA256SUMS.txt`.
+- **Before running: verify the hashes** as explained in `VERIFY.md`
+  (SHA256 + Defender/VirusTotal + sandbox).
+- Linux: `build_linux.sh` → `dist/simple-ehm`, `dist/simple-ehm-gui`.
+- Debian: `build_deb.sh` → `simple-ehm_<ver>_amd64.deb`
+  (`sudo apt install ./simple-ehm_*_amd64.deb`, also shows up in the app menu).
+  PyInstaller specs: `simple-ehm-cli.spec`, `simple-ehm-gui.spec`.
+
+## Publishing models (maintainers)
+
+Attach to a GitHub Release: `model.keras` + `manifest.json`
+(`models/manifest.json` is the template: `version`, `url`, `sha256`, `size`).
+Clients download only when `manifest.version != model.keras.version`.
+
+Docker: `docker build -t simple-ehm .`, then `./convert.sh /path/to/video [args...]`
+(input files must be inside this folder for the bind-mount).
 
 # ITA
 
-# simple-ehm
-Un semplice strumento per un semplice compito: rimuovere gli "ehm" (suoni di riempimento) da discorsi pre-registrati. 
+![logo](assets/logo-horizontal.png)
 
-# Utilizzo
-L'invocazione base dovrebbe essere sufficiente:
-`./simple_emh-runnable.py /percorso/al/file/video`
-Questo genererò una traccia di sottotitoli (`.srt`) per fini diagnostici e il video tagliato nella stessa cartella del file originale.
+Un semplice strumento per un semplice compito: rimuovere gli "ehm" dai discorsi
+pre-registrati.
 
-Per maggiori informazioni sui parametri accettati, leggi la guida:
-`./simple_emh-runnable.py --help`
+```bash
+pip install -r requirements.txt
+python simple_ehm-runnable.py /percorso/al/video.mp4 --srt --fastcut
+# GUI: python simple_ehm_gui.py
+```
 
-Puoi anche utilizzare simple-ehm in un ambiente dockerizzato, per fare ciò crea l'immagine `docker build -t simple .`, e
-dove useresti `./simple_ehm-runnable.py` utilizza invece `./convert.sh` (N.B. per usare `./convert.sh` i file devono
-essere spostati prima in questa cartella)
+- **GPU NVIDIA automatica:** `--device auto` usa la GPU se TensorFlow la vede,
+  altrimenti CPU. `--encoder auto` usa `h264_nvenc` se il tuo ffmpeg lo
+  supporta, altrimenti `libx264`. `--list-devices` dice cosa può usare il PC.
+  Su Windows nativo inferenza solo CPU; per la GPU serve Linux + CUDA o WSL2
+  (l'encoding NVENC funziona anche su Windows).
+- **Lingua automatica:** IT/EN dal PC (API Windows / locale Linux),
+  `--lang it|en` o `SIMPLE_EHM_LANG` per forzare.
+- **Modelli da GitHub:** al primo avvio scarica `model.keras` solo se manca o è
+  più vecchio del `manifest.json` della release.
+- **GUI:** `python simple_ehm_gui.py`: tema scuro/chiaro, lingua IT/EN, barra
+  di avanzamento, registro, Ferma, "Apri cartella" e opzioni avanzate.
+- **Binary:** `build_windows.ps1` (exe), `build_linux.sh` + `build_deb.sh` (.deb).
 
-# Contribuire al modello
-Ci sono due modi in cui puoi contribuire al modello:
+## Contribuire al modello / dataset
 
-## Contribuisci al dataset
-Inviandomi almeno 30 clip in formato WAV (pcm_s16le) mono con campionamento a 16kHz per ciascuna classe (silenzio, parlato, ehm)  [facile]
-- Puoi convertire le tue clip nel formato corretto con ffmpeg: `ffmpeg -i input-file -c:a pcm_s16le -ac 1 -ar 16000 -filter:a "dynaudnorm" output.wav`
-- Puoi estrarre gli ehm(s) e i silenzi **anche quelli classificati erroneamente** (falsi positivi) passando `--generate-training-data` come parametro di invocazione. Puoi usare le clip classificate erroneamente per migliorare il tuo training set!
-
-## Contribuisci al training
-- Implementando la logica di transfer training sul notebook python di questo modello, e
-- Eseguendo il retraining della rete esistente con il tuo dataset ed inviandomi il modello aggiornato.
+Vedi le istruzioni originali nel notebook `simple_ehm.ipynb` e
+`trainingset/`: clip WAV `pcm_s16le` mono 16 kHz per classe
+(`silence`, `speech`, `ehm`), estraibili con `--generate-training-data`.

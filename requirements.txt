@@ -1,7 +1,6 @@
-tensorflow==2.13.0
-matplotlib
-seaborn
-tqdm
-psutil
-opencv-python
-protobuf==3.20.0
+# Tested on Python 3.10-3.13 / Windows + Linux. TF 2.21 needs protobuf>=6.31 (do NOT pin 3.20).
+tensorflow>=2.16,<2.22
+numpy>=1.26
+tqdm>=4.64
+psutil>=5.9
+opencv-python-headless>=4.8

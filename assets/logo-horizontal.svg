@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3B1F4E"/>
+      <stop offset="1" stop-color="#17122B"/>
+    </linearGradient>
+    <radialGradient id="lips" cx="0.5" cy="0.40" r="0.8">
+      <stop offset="0" stop-color="#FF8598"/>
+      <stop offset="0.55" stop-color="#EE4266"/>
+      <stop offset="1" stop-color="#A81540"/>
+    </radialGradient>
+  </defs>
+  <rect x="16" y="16" width="480" height="480" rx="110" fill="url(#bg)"/>
+  <path d="M100,258
+           C130,215 150,192 185,190
+           C210,190 230,210 256,224
+           C282,210 302,190 327,190
+           C362,192 382,215 412,258
+           C390,315 330,350 256,356
+           C182,350 122,315 100,258 Z" fill="url(#lips)"/>
+  <ellipse cx="197" cy="219" rx="30" ry="16" fill="#FF9DAD" opacity="0.8"/>
+  <ellipse cx="315" cy="219" rx="30" ry="16" fill="#FF9DAD" opacity="0.8"/>
+  <path d="M256,192 L256,220" stroke="#8E1538" stroke-width="6"
+        stroke-linecap="round" opacity="0.7"/>
+  <path d="M100,258 C150,252 190,256 222,260" stroke="#7E1230"
+        stroke-width="6" fill="none" stroke-linecap="round" opacity="0.8"/>
+  <path d="M412,258 C362,252 322,256 290,260" stroke="#7E1230"
+        stroke-width="6" fill="none" stroke-linecap="round" opacity="0.8"/>
+  <g stroke="#8E1538" stroke-width="6" stroke-linecap="round" opacity="0.7">
+    <path d="M196,196 L212,220"/>
+    <path d="M316,196 L300,220"/>
+    <path d="M158,232 L186,244"/>
+    <path d="M354,232 L326,244"/>
+    <path d="M150,300 L180,292"/>
+    <path d="M362,300 L332,292"/>
+    <path d="M196,332 L214,312"/>
+    <path d="M316,332 L298,312"/>
+  </g>
+  <ellipse cx="256" cy="264" rx="30" ry="38" fill="#42060F"/>
+  <ellipse cx="256" cy="264" rx="30" ry="38" fill="none"
+           stroke="#FF97A9" stroke-width="7"/>
+  <ellipse cx="247" cy="252" rx="8" ry="11" fill="#FFFFFF" opacity="0.25"/>
+  <ellipse cx="256" cy="326" rx="58" ry="12" fill="#FFFFFF" opacity="0.32"/>
+  <text x="548" y="300" font-family="Verdana, Arial, sans-serif"
+        font-size="104" font-weight="bold" fill="#F4F1FA">simple-<tspan fill="#FF6B81">ehm</tspan></text>
+</svg>
